@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentsService } from './comments.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Comment } from './comments.entity';
 import { User } from '../users/users.entity';
 import { Post } from '../posts/posts.entity';
