@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './comments.entity';
@@ -17,22 +17,22 @@ export class CommentsService {
   async update(id: number, content: string, userId: number) {
     const comment = await this.repo.findOne({ where: { id }, relations: ['user'] });
 
-    if (!comment) throw new Error('Comment not found');
-    if (!comment.user) throw new Error('User not found');
-    if (!comment.post) throw new Error('Post not found');
+    if (!comment) throw new NotFoundException('Comment not found');
+    if (!comment.user) throw new NotFoundException('User not found');
+    if (!comment.post) throw new NotFoundException('Post not found');
 
-    if (comment.user.id !== userId) throw new Error('Unauthorized');
+    if (comment.user.id !== userId) throw new UnauthorizedException('Unauthorized');
     comment.content = content;
     return this.repo.save(comment);
   }
 
   async remove(id: number, userId: number) {
     const comment = await this.repo.findOne({ where: { id }, relations: ['user'] });
-    if (!comment) throw new Error('Comment not found');
-    if (!comment.user) throw new Error('User not found');
-    if (!comment.post) throw new Error('Post not found');
+    if (!comment) throw new NotFoundException('Comment not found');
+    if (!comment.user) throw new NotFoundException('User not found');
+    if (!comment.post) throw new NotFoundException('Post not found');
 
-    if (comment.user.id !== userId) throw new Error('Unauthorized');
+    if (comment.user.id !== userId) throw new UnauthorizedException('Unauthorized');
     return this.repo.remove(comment);
   }
 }
