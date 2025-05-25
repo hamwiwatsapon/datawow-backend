@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post, Category } from './posts.entity';
 import { User } from '../users/users.entity';
-import { Comment } from '@/comments/comments.entity';
+import { Comment } from '../comments/comments.entity';
 
 @Injectable()
 export class PostsService implements OnModuleInit {
@@ -32,16 +32,15 @@ export class PostsService implements OnModuleInit {
     }
   }
 
-  create(title: string, content: string, user: User, category: Category) {
-    if (category && !(category instanceof Category)) {
-      throw new BadRequestException('Invalid category');
-    }
-
+  async create(title: string, content: string, user: User, category: Category): Promise<Post> {
     if (!title || !content) {
       throw new BadRequestException('Title and content are required');
     }
     if (!user) {
       throw new BadRequestException('User is required');
+    }
+    if (!(category instanceof Category)) {
+      throw new BadRequestException('Category must be a Category instance');
     }
     const post = this.repo.create({ title, content, user, category });
     return this.repo.save(post);
