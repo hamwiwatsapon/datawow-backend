@@ -107,6 +107,21 @@ curl -X POST http://localhost:3000/users/login \
 
 ---
 
+## 🧪 Running Unit Tests
+
+To run all unit tests for the project, use the following command:
+
+```bash
+npm run test
+```
+
+For watch mode (automatically re-runs tests on file changes):
+
+```bash
+npm run test:watch
+```
+
+
 ## 🙋‍♂️ Author
 Developed by Wiwatsapon - for testing interview DataWoW
 
