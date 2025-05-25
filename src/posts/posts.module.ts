@@ -4,9 +4,10 @@ import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { Category, Post } from './posts.entity';
 import { UsersModule } from '../users/users.module';
+import { Comment } from '@/comments/comments.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, Category]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Post, Category, Comment]), UsersModule],
   providers: [PostsService],
   controllers: [PostsController],
   exports: [PostsService],

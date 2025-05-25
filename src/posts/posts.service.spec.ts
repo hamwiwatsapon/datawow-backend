@@ -73,12 +73,67 @@ describe('PostsService', () => {
   });
 
   describe('findAll', () => {
+    function createQueryBuilderMock(returnValue: any[] = []) {
+      // All chainable methods must return 'this'
+      const qb: any = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(returnValue),
+      };
+      return qb;
+    }
+
     it('should return all posts with relations', async () => {
       const posts = [{ id: 1 } as Post];
-      repo.find.mockResolvedValue(posts as any);
+      const queryBuilderMock = createQueryBuilderMock(posts);
+
+      // @ts-ignore
+      repo.createQueryBuilder = jest.fn().mockReturnValue(queryBuilderMock);
+
       const result = await service.findAll();
-      expect(repo.find).toHaveBeenCalledWith({ relations: ['user', 'comments', 'category'] });
+      expect(queryBuilderMock.leftJoinAndSelect).toHaveBeenCalledWith('post.user', 'user');
+      expect(queryBuilderMock.leftJoinAndSelect).toHaveBeenCalledWith('post.comments', 'comments');
+      expect(queryBuilderMock.leftJoinAndSelect).toHaveBeenCalledWith('comments.user', 'commentUser');
+      expect(queryBuilderMock.leftJoinAndSelect).toHaveBeenCalledWith('post.category', 'category');
+      expect(queryBuilderMock.getMany).toHaveBeenCalled();
       expect(result).toEqual(posts);
+    });
+
+    it('should filter by categoryId', async () => {
+      const posts = [{ id: 2 } as Post];
+      const queryBuilderMock = createQueryBuilderMock(posts);
+
+      // @ts-ignore
+      repo.createQueryBuilder = jest.fn().mockReturnValue(queryBuilderMock);
+
+      await service.findAll('5');
+      expect(queryBuilderMock.andWhere).toHaveBeenCalledWith('category.id = :categoryId', { categoryId: '5' });
+    });
+
+    it('should filter by search', async () => {
+      const posts = [{ id: 3 } as Post];
+      const queryBuilderMock = createQueryBuilderMock(posts);
+
+      // @ts-ignore
+      repo.createQueryBuilder = jest.fn().mockReturnValue(queryBuilderMock);
+
+      await service.findAll(undefined, 'test');
+      expect(queryBuilderMock.andWhere).toHaveBeenCalledWith(
+        '(LOWER(post.title) LIKE :search OR LOWER(user.username) LIKE :search)',
+        { search: '%test%' }
+      );
+    });
+
+    it('should filter by userId', async () => {
+      const posts = [{ id: 4 } as Post];
+      const queryBuilderMock = createQueryBuilderMock(posts);
+
+      // @ts-ignore
+      repo.createQueryBuilder = jest.fn().mockReturnValue(queryBuilderMock);
+
+      await service.findAll(undefined, undefined, '7');
+      expect(queryBuilderMock.andWhere).toHaveBeenCalledWith('user.id = :userId', { userId: '7' });
     });
   });
 
